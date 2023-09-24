@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <title>Socket.io Chat App</title>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+</head>
+<body>
+<h1>Socket.io Chat App</h1>
+<input id="name" type="text" style='width:200px' value=""> User Name</br></br></br></br>
+<input id="text" type="text" style='width:200px' value="">
+<button id="send">Send</button></br></br>
+Conservation:</br>
+<div id="chat"></div></br></br></br></br></br>
+Log:</br>
+<div id="notification"></div>
+
+<script>
+    // if we don't specify a url, then socket.io will use the current host
+    const socket = io();
+    // Waiting for socket establish connection and add session ID to username
+    socket.on("connect", () => {
+        document.getElementById('name').value = socket.id;
+    });
+
+    function addToChat(message) {
+        const chat = document.getElementById('chat');
+        chat.innerHTML += `${message}</br>`;
+    }
+
+    // when we receive a 'message' event from the server, we add it to the chat
+    socket.on('message', addToChat);
+    // when we click the send button, we send the input to the server, add it to the chat and clear the box
+    document.getElementById('send').addEventListener('click', () => {
+        const chatValue = document.getElementById('name').value + ": "+ document.getElementById('text').value;
+        addToChat(chatValue);
+        socket.emit('message', chatValue);
+        document.getElementById('text').value = '';
+    })
+</script>
+<script>
+    //Listen Test Event timeout
+    socket.on('testerEvent', addToNotification);
+    //Send data
+    socket.emit('clientEvent', 'Sent an event from the client! ');
+    function addToNotification(message) {
+        const chat = document.getElementById('notification');
+        chat.innerHTML += `${message}</br>`;
+    }
+    socket.on('Notification', addToNotification);
+
+    //Start Test Socket Callback or Server Acknowledgement
+    socket.on("update item", (arg1, arg2, callback) => {
+        console.log(arg1);
+        console.log(arg2);
+        callback({
+            status: "ok"
+        });
+    });
+    //End Test Socket Callback or Server Acknowledgement
+</script>
+</body>
+</html>
